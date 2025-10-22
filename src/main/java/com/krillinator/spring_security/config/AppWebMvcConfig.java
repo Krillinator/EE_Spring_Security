@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc   // Used in Combination with @Config & WebMvcConfigure
-public class CustomWebMvcConfig implements WebMvcConfigurer {
+public class AppWebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {

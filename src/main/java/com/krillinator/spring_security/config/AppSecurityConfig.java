@@ -1,5 +1,6 @@
 package com.krillinator.spring_security.config;
 
+import jakarta.validation.constraints.Size;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,15 +20,9 @@ public class AppSecurityConfig {
 
         // TODO - Question: Why does /adminpage lead to a 403 forbidden?
         httpSecurity.authorizeHttpRequests(
-                auth -> auth.requestMatchers("/").permitAll()   // Allow localhost:8080/
-                        .requestMatchers("").blacklist("ADMIN, BATMAN")
-
-                /* ROLES
-                *   GUEST
-                *   USER
-                *   ADMIN
-                *   BATMAN
-                * */
+                auth -> auth
+                        .requestMatchers("/").permitAll()       // Allow localhost:8080/
+                        .requestMatchers("/debug").permitAll()  // RestController for Debugging
         );
 
         return httpSecurity.build();
