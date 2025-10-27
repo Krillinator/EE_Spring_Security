@@ -12,4 +12,10 @@ public class CustomViewController {
         return "adminpage"; // Must Reflect .html document name
     }
 
+    @GetMapping("/user")
+    public String userPage() {
+
+        return "userpage";
+    }
+
 }
