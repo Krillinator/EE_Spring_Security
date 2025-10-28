@@ -9,9 +9,7 @@ package com.krillinator.spring_security.user.authority;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.krillinator.spring_security.user.authority.UserPermission.*;
 
