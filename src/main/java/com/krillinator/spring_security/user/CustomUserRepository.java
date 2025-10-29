@@ -9,6 +9,7 @@ import java.util.UUID;
 @Repository
 public interface CustomUserRepository extends JpaRepository<CustomUser, UUID> {
 
+    // Method will be called within UserDetailsService
     Optional<CustomUser> findUserByUsername(String username);
 
 }

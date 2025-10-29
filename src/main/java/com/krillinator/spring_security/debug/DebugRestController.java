@@ -1,11 +1,11 @@
 package com.krillinator.spring_security.debug;
 
-import com.krillinator.spring_security.config.AppPasswordConfig;
 import com.krillinator.spring_security.user.CustomUser;
 import com.krillinator.spring_security.user.CustomUserRepository;
 import com.krillinator.spring_security.user.authority.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,14 +29,15 @@ public class DebugRestController {
         this.customUserRepository = customUserRepository;
     }
 
-    @GetMapping("/create-debug-user")
-    public ResponseEntity<String> createNewDebugCustomUser() {
+
+    @GetMapping("/create-debug-admin")
+    public ResponseEntity<String> createDebugAdmin() {
 
         try {
             customUserRepository.save(
                     new CustomUser(
-                            "Benny",
-                            passwordEncoder.encode("123"),
+                            "Frida",
+                            passwordEncoder.encode("321"),
                             true,
                             true,
                             true,
@@ -45,14 +46,16 @@ public class DebugRestController {
                     )
             );
 
-            return ResponseEntity.ok().body("New User was created");
-        } catch (DataIntegrityViolationException ex) {
-            return ResponseEntity.badRequest().body("Username already exists" + ex);
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body("Something went wrong");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("User was SUCCESFULLY Created!");
+        } catch (DataIntegrityViolationException exception) { // TODO - Username Already Exists
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists: " + exception.getLocalizedMessage()); // TODO - CONFLICT vs BAD REQUEST?
+        } catch (Exception exception) {
+            return ResponseEntity.internalServerError().body("Something went wrong..." + exception.getLocalizedMessage());
         } finally {
-            System.out.println("Process: creating new debug user, finishing.");
+            System.out.println("Creating debug user function - ENDED");
         }
+
     }
 
     @GetMapping

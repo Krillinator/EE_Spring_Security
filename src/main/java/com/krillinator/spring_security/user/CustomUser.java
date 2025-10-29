@@ -7,12 +7,27 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+/** Entity - Separation of Concerns
+ * This SHOULD NOT implement UserDetails
+ * Handle UserDetails separately as its own class for better SoC
+ * Should however, reflect UserDetails Variables as best practice
+ * */
+
 @Table(name = "users")
+@Entity
 public class CustomUser {
 
-    @Id @GeneratedValue(strategy = GenerationType.UUID) @Column(updatable = false, nullable = false)
+    /** UUID
+     * + Harder to accidentally expose
+     * + Scales better in Global Apps (non-monolithic)
+     * + Unique serial Key
+     * - Harder to debug
+     * - 16 bytes (2x larger than Long)
+     * */
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID id;
+
     @Column(unique = true, nullable = false)
     private String username;
     private String password;
@@ -21,27 +36,28 @@ public class CustomUser {
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
 
-    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER) // Fetch Immediately
     @Enumerated(value = EnumType.STRING)
-    private Set<UserRole> userRoles = new HashSet<>();
+    private Set<UserRole> roles;
 
+    // Constructors
     public CustomUser() {}
-    public CustomUser(String username, String password, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired, boolean isEnabled, Set<UserRole> userRole) {
+    public CustomUser(String username, String password, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired, boolean isEnabled, Set<UserRole> roles) {
         this.username = username;
         this.password = password;
         this.isAccountNonExpired = isAccountNonExpired;
         this.isAccountNonLocked = isAccountNonLocked;
         this.isCredentialsNonExpired = isCredentialsNonExpired;
         this.isEnabled = isEnabled;
-        this.userRoles = userRole;
+        this.roles = roles;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
+    public UUID getId() {
+        return id;
     }
 
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setUserRoles(Set<UserRole> roles) {
+        this.roles = roles;
     }
 
     public String getUsername() {
@@ -90,5 +106,13 @@ public class CustomUser {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = roles;
     }
 }
