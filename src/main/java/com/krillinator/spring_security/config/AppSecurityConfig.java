@@ -34,8 +34,8 @@ public class AppSecurityConfig {
         httpSecurity.authorizeHttpRequests(
                 auth -> auth
                         // .requestMatchers() // TODO - check against specific HTTP METHOD
-                        .requestMatchers("/").permitAll()       // Allow localhost:8080/
-                        .requestMatchers("/debug/**").permitAll()  // RestController for Debugging
+                        .requestMatchers("/", "/register").permitAll()  // Allow localhost:8080/
+                        .requestMatchers("/debug/**").permitAll()       // RestController for Debugging
                         .requestMatchers("/admin", "/tools").hasRole("ADMIN")
                         .requestMatchers("/user").hasRole(UserRole.USER.name())
                         .anyRequest().authenticated() // MUST exist AFTER matchers, TODO - Is this true by DEFAULT?
