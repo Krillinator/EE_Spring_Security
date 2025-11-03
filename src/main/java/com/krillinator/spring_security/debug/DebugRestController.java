@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,15 @@ public class DebugRestController {
     public DebugRestController(PasswordEncoder passwordEncoder, CustomUserRepository customUserRepository) {
         this.passwordEncoder = passwordEncoder;
         this.customUserRepository = customUserRepository;
+    }
+
+    @GetMapping("/auth-session")
+    public ResponseEntity<String> debugAuthenticationSession(Authentication authentication) {
+        System.out.println(authentication.getClass().getSimpleName());
+        System.out.println(authentication.isAuthenticated());
+        System.out.println(authentication);
+
+        return ResponseEntity.ok().body("Check logs");
     }
 
     // Debugging HTTPSession Object from Tomcat & HttpServletRequest

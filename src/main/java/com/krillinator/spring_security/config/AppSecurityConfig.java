@@ -4,7 +4,6 @@ import com.krillinator.spring_security.user.authority.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,7 +36,7 @@ public class AppSecurityConfig {
         // TODO Memory Storage Attack - https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/erasure.html
 
         httpSecurity
-                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
+                //.csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
                 .authorizeHttpRequests( auth -> auth
                         // .requestMatchers() // TODO - check against specific HTTP METHOD
                         .requestMatchers("/", "/register", "/static/**").permitAll()  // Allow localhost:8080/
@@ -76,10 +75,10 @@ public class AppSecurityConfig {
 
                 .sessionManagement(session -> session
                         // How long an inactive session lasts
-                        .invalidSessionUrl("/login?invalid")
-                        .maximumSessions(1)                 // 🔒 Max 1 concurrent session per user
+                        // .invalidSessionUrl("/login?invalid")                     // Prevent Login Problems
+                        .maximumSessions(1)                         // 🔒 Max 1 concurrent session per user
                         .maxSessionsPreventsLogin(false)     // false = old session invalidated
-                        .expiredUrl("/login?expired")        // redirect if user logs in elsewhere
+                        .expiredUrl("/login?expired")                    // redirect if user logs in elsewhere
                 );
 
 
