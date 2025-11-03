@@ -3,6 +3,8 @@ package com.krillinator.spring_security.debug;
 import com.krillinator.spring_security.user.CustomUser;
 import com.krillinator.spring_security.user.CustomUserRepository;
 import com.krillinator.spring_security.user.authority.UserRole;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,30 @@ public class DebugRestController {
     public DebugRestController(PasswordEncoder passwordEncoder, CustomUserRepository customUserRepository) {
         this.passwordEncoder = passwordEncoder;
         this.customUserRepository = customUserRepository;
+    }
+
+    // Debugging HTTPSession Object from Tomcat & HttpServletRequest
+    @GetMapping("/session-attributes")
+    public ResponseEntity<String> debugSessionAttributes(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return ResponseEntity.ok("No session found.");
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Session ID: ").append(session.getId()).append("\n");
+        sb.append("Attributes:\n");
+
+        var names = session.getAttributeNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            Object value = session.getAttribute(name);
+            sb.append(" • ").append(name)
+                    .append(" = ").append(value)
+                    .append("\n");
+        }
+
+        return ResponseEntity.ok(sb.toString());
     }
 
 

@@ -7,18 +7,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableWebSecurity
 public class AppSecurityConfig {
 
     private final PasswordEncoder passwordEncoder; // This will inject AppPasswordConfig BY DEFAULT (No Bean Collision)
+    private final UserDetailsService userDetailsService;    // CustomUserDetailsService
 
     @Autowired
-    public AppSecurityConfig(PasswordEncoder passwordEncoder) {
+    public AppSecurityConfig(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
         this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
     }
 
     @Bean
@@ -31,16 +36,52 @@ public class AppSecurityConfig {
 
         // TODO Memory Storage Attack - https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/erasure.html
 
-        httpSecurity.authorizeHttpRequests(
-                auth -> auth
+        httpSecurity
+                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
+                .authorizeHttpRequests( auth -> auth
                         // .requestMatchers() // TODO - check against specific HTTP METHOD
-                        .requestMatchers("/", "/register").permitAll()  // Allow localhost:8080/
-                        .requestMatchers("/debug/**").permitAll()       // RestController for Debugging
+                        .requestMatchers("/", "/register", "/static/**").permitAll()  // Allow localhost:8080/
+                        .requestMatchers("/debug/**").permitAll()                     // RestController for Debugging
                         .requestMatchers("/admin", "/tools").hasRole("ADMIN")
                         .requestMatchers("/user").hasRole(UserRole.USER.name())
                         .anyRequest().authenticated() // MUST exist AFTER matchers, TODO - Is this true by DEFAULT?
         )
-                .formLogin(Customizer.withDefaults());  // Use Default FormLogin Settings / Authentication
+
+                // TODO - Logging for Authentication
+                .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
+                        .loginPage("/login").permitAll()
+                        .loginProcessingUrl("/authenticate") // default is /login for processing auth
+                        .usernameParameter("username")  // Must match HTML param
+                        .passwordParameter("password")
+                        .failureUrl("/login?error")
+                        .defaultSuccessUrl("/", false)      // Redirect after login->home (false by default)
+                        // .failureForwardUrl("")                                   // Handle Login Attempts
+                        // .successForwardUrl("")                                   // Handles Success Logic
+                )
+
+                .logout(logoutConfigurer -> logoutConfigurer
+                        .logoutUrl("/logout").permitAll()
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID", "remember-me")
+                        .logoutSuccessUrl("/login?logout")          // Redirect -> Login
+                )
+
+                .rememberMe(rememberMeConfigurer -> rememberMeConfigurer
+                        .key("some-secure-key")            // Some SECURE key
+                        .rememberMeParameter("remember-me")           // remember-me default
+                        .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(24)) // 24 days
+                        .userDetailsService(userDetailsService) // Use Our CustomUser Implementation
+                )
+
+                .sessionManagement(session -> session
+                        // How long an inactive session lasts
+                        .invalidSessionUrl("/login?invalid")
+                        .maximumSessions(1)                 // 🔒 Max 1 concurrent session per user
+                        .maxSessionsPreventsLogin(false)     // false = old session invalidated
+                        .expiredUrl("/login?expired")        // redirect if user logs in elsewhere
+                );
+
 
         return httpSecurity.build();
     }

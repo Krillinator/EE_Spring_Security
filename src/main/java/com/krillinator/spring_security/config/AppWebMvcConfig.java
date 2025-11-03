@@ -2,6 +2,7 @@ package com.krillinator.spring_security.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -14,5 +15,11 @@ public class AppWebMvcConfig implements WebMvcConfigurer {
         registry
                 .addViewController("/")  // Path
                 .setViewName("homepage");              // Resource
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**")           // All Resources within Static Folder
+                .addResourceLocations("classpath:/static");   // Path to Directory
     }
 }

@@ -27,6 +27,18 @@ public class CustomViewController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @GetMapping("/login")
+    public String loginPage() {
+
+        return "login";
+    }
+
+    @GetMapping("/logout")
+    public String logoutPage() {
+
+        return "logout";
+    }
+
     @GetMapping("/admin")
     public String adminPage() {
 
