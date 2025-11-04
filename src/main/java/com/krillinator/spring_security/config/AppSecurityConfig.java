@@ -2,6 +2,7 @@ package com.krillinator.spring_security.config;
 
 import com.krillinator.spring_security.user.authority.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +17,13 @@ import java.util.concurrent.TimeUnit;
 @EnableWebSecurity
 public class AppSecurityConfig {
 
+    private final String rememberMeKey;
     private final PasswordEncoder passwordEncoder; // This will inject AppPasswordConfig BY DEFAULT (No Bean Collision)
     private final UserDetailsService userDetailsService;    // CustomUserDetailsService
 
     @Autowired
-    public AppSecurityConfig(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+    public AppSecurityConfig(@Value("{remember.me.cookie}") String rememberMeKey, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+        this.rememberMeKey = rememberMeKey;
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
     }
@@ -67,7 +70,7 @@ public class AppSecurityConfig {
                 )
 
                 .rememberMe(rememberMeConfigurer -> rememberMeConfigurer
-                        .key("some-secure-key")            // Some SECURE key
+                        .key(rememberMeKey)            // Some SECURE key
                         .rememberMeParameter("remember-me")           // remember-me default
                         .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(24)) // 24 days
                         .userDetailsService(userDetailsService) // Use Our CustomUser Implementation
