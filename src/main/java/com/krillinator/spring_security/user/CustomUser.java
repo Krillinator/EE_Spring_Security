@@ -2,12 +2,8 @@ package com.krillinator.spring_security.user;
 
 import com.krillinator.spring_security.user.authority.UserRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,26 +29,13 @@ public class CustomUser {
     private UUID id;
 
     @Column(unique = true, nullable = false)
-    @Size(min = 2, max = 25, message = "Username length should be between 2-25")
     private String username;
-
-    @Pattern(
-            regexp = "^" +
-                    "(?=.*[a-z])" +        // at least one lowercase letter
-                    "(?=.*[A-Z])" +        // at least one uppercase letter
-                    "(?=.*[0-9])" +        // at least one digit
-                    "(?=.*[ @$!%*?&])" +   // at least one special character
-                    ".+$",                 // one or more characters, until end
-            message = "Password must contain at least one uppercase, one lowercase, one digit, and one special character"
-    )
-    @Size(max = 80, message = "Maximum length of password exceeded")
     private String password;
-    private boolean isAccountNonExpired; // TODO - Not Null bean validation (Is there a way to set it for multiple vars)
+    private boolean isAccountNonExpired;
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
 
-    // TODO - NotNull for Enums
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER) // Fetch Immediately
     @Enumerated(value = EnumType.STRING)
     private Set<UserRole> roles;
@@ -89,8 +72,9 @@ public class CustomUser {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    // TODO - Param injection, alternatives that are smoother that doesn't require manual param passing
+    public void setPassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 
     public boolean isAccountNonExpired() {

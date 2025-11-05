@@ -17,15 +17,16 @@ import java.util.concurrent.TimeUnit;
 @EnableWebSecurity
 public class AppSecurityConfig {
 
-    private final String rememberMeKey;
-    private final PasswordEncoder passwordEncoder; // This will inject AppPasswordConfig BY DEFAULT (No Bean Collision)
     private final UserDetailsService userDetailsService;    // CustomUserDetailsService
+    private final String rememberMeKey;
 
     @Autowired
-    public AppSecurityConfig(@Value("{remember.me.cookie}") String rememberMeKey, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
-        this.rememberMeKey = rememberMeKey;
-        this.passwordEncoder = passwordEncoder;
+    public AppSecurityConfig(
+            UserDetailsService userDetailsService,
+            @Value("{remember.me.key}") String rememberMeKey    // Constructor Param (property-driven) App.properties
+    ) {
         this.userDetailsService = userDetailsService;
+        this.rememberMeKey = rememberMeKey;
     }
 
     @Bean
@@ -70,7 +71,7 @@ public class AppSecurityConfig {
                 )
 
                 .rememberMe(rememberMeConfigurer -> rememberMeConfigurer
-                        .key(rememberMeKey)            // Some SECURE key
+                        .key(rememberMeKey)
                         .rememberMeParameter("remember-me")           // remember-me default
                         .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(24)) // 24 days
                         .userDetailsService(userDetailsService) // Use Our CustomUser Implementation
