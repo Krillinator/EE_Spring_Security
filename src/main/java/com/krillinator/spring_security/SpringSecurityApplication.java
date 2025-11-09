@@ -3,10 +3,10 @@ package com.krillinator.spring_security;
 import com.krillinator.spring_security.user.CustomUser;
 import com.krillinator.spring_security.user.CustomUserDetails;
 import com.krillinator.spring_security.user.authority.UserRole;
+import com.krillinator.spring_security.security.jwt.JwtUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Arrays;
 import java.util.Set;
 
 @SpringBootApplication
@@ -42,10 +42,21 @@ public class SpringSecurityApplication {
 				true,
 				Set.of(UserRole.USER, UserRole.ADMIN)
 		);
+		/*
+			CustomUserDetails customUserDetails = new CustomUserDetails(benny);
+			System.out.println("getAuthorities: " + customUserDetails.getAuthorities());
 
-		CustomUserDetails customUserDetails = new CustomUserDetails(benny);
+			JwtUtils jwtUtils = new JwtUtils();
 
-		System.out.println("getAuthorities: " + customUserDetails.getAuthorities());
+			// Generate the token
+			String token = jwtUtils.generateJwtToken(benny);
+			System.out.println("Generated JWT:\n" + token);
+
+			// Extract the roles
+			Set<UserRole> extractedRoles = jwtUtils.getRolesFromJwtToken(token);
+			System.out.println("Extracted roles: " + extractedRoles);
+
+		 */
 	}
 
 }
