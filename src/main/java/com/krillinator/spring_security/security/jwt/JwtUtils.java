@@ -4,7 +4,9 @@ import com.krillinator.spring_security.user.CustomUser;
 import com.krillinator.spring_security.user.authority.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,12 +23,12 @@ public class JwtUtils {
 
     private final String base64EncodedSecretKey = "U2VjdXJlQXBpX1NlY3JldEtleV9mb3JfSFMyNTYwX3NlY3JldF9wcm9qZWN0X2tleV9leGFtcGxl";
     private final byte[] keyBytes = Base64.getDecoder().decode(base64EncodedSecretKey);
-    private final SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+    private final SecretKey key = Keys.hmacShaKeyFor(keyBytes); // HMAC algorithm
 
     // JWT expiration time (1 hour)
-    private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(1);
+    private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(1);   // TODO - Check Expiration
 
-    public String generateJwtToken(CustomUser customUser) {
+    public String generateJwtToken(CustomUser customUser) { // TODO - CustomUserDetails
         logger.debug("Generating JWT for user: {} with roles: {}", customUser.getUsername(), customUser.getRoles());
 
         List<String> roles = customUser.getRoles().stream().map(
@@ -34,11 +36,11 @@ public class JwtUtils {
         ).toList();
 
         String token = Jwts.builder()
-                .subject(customUser.getUsername())
-                .claim("authorities", roles)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(key)
+                .subject(customUser.getUsername())  // sub
+                .claim("authorities", roles)  // claim: authorities (claim is used for custom fields)
+                .issuedAt(new Date())               // iat
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // exp
+                .signWith(key)  // TODO - signWith using a predefined Algorithm. //.signWith(key, SignatureAlgorithm)
                 .compact();
 
         logger.info("JWT generated successfully for user: {}", customUser.getUsername());
@@ -52,8 +54,7 @@ public class JwtUtils {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-
-            String username = claims.getSubject();
+            String username = claims.getSubject(); // Subject, whom the token refers to, principal: whose currently authenticated (system)
             logger.debug("Extracted username '{}' from JWT token", username);
             return username;
 
@@ -90,7 +91,7 @@ public class JwtUtils {
         return roles;
     }
 
-
+    // Used to pass in JWT token for Validation
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser()
@@ -104,6 +105,7 @@ public class JwtUtils {
         } catch (Exception e) {
             logger.error("JWT validation failed: {}", e.getMessage());
         }
+
         return false;
     }
 }

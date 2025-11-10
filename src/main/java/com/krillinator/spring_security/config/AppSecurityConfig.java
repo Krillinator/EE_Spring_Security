@@ -27,7 +27,7 @@ public class AppSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+        return configuration.getAuthenticationManager(); // Handles: Password Encoder, UserDetailsService, Authentication
     }
 
     @Bean

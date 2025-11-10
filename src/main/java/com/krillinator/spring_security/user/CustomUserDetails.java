@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final CustomUser customUser;
+    private final CustomUser customUser; // Entity
 
     public CustomUserDetails(CustomUser customUser) {
         this.customUser = customUser;

@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtils jwtUtils;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService; // TODO - Change to UserDetailsService
 
     @Autowired
     public JwtAuthenticationFilter(JwtUtils jwtUtils,
@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            @NonNull FilterChain filterChain        // Decides when a filterChain stops
     ) throws ServletException, IOException {
 
         logger.debug("---- JwtAuthenticationFilter START ----");
@@ -65,8 +65,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 // Live DB lookup (ensures user still exists / is enabled)
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username); // ENTITY
 
+                // Possibility to check for other userDetails booleans
                 if (userDetails != null && userDetails.isEnabled()) {
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
@@ -75,6 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     userDetails.getAuthorities()
                             );
 
+                    // Update Spring with possible new change
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -92,11 +94,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         logger.debug("---- JwtAuthenticationFilter END ----");
     }
 
+    // TODO - Move out to JWTUtil Functions
     // Helper: Extract JWT from cookie
     private String extractJwtFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         for (Cookie cookie : request.getCookies()) {
-            if ("authToken".equals(cookie.getName())) {
+            if ("authToken".equals(cookie.getName())) {     // Cookie should be named authToken
                 return cookie.getValue();
             }
         }

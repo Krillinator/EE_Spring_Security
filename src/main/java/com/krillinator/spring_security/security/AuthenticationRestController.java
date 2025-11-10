@@ -30,6 +30,7 @@ public class AuthenticationRestController {
         this.authenticationManager = authenticationManager;
     }
 
+    // TODO - Test against permissions
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(
             @RequestParam String username,
@@ -81,7 +82,7 @@ public class AuthenticationRestController {
 
         logger.info("Authentication successful for user: {}", username);
 
-        // Step 5: Return token
+        // Step 5: Return token - Optional
         return ResponseEntity.ok(Map.of(
                 "username", username,
                 "authorities", customUserDetails.getAuthorities(),
