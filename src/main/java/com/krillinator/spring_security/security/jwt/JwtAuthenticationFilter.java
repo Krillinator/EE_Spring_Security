@@ -45,9 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         logger.debug("---- JwtAuthenticationFilter START ----");
 
         // Extract token
-        String token = extractJwtFromCookie(request);
+        String token = jwtUtils.extractJwtFromCookie(request);
         if (token == null) {
-            token = extractJwtFromRequest(request); // fallback to Authorization header
+            token = jwtUtils.extractJwtFromRequest(request); // fallback to Authorization header
         }
 
         if (token == null) {
@@ -94,24 +94,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         logger.debug("---- JwtAuthenticationFilter END ----");
     }
 
-    // TODO - Move out to JWTUtil Functions
-    // Helper: Extract JWT from cookie
-    private String extractJwtFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        for (Cookie cookie : request.getCookies()) {
-            if ("authToken".equals(cookie.getName())) {     // Cookie should be named authToken
-                return cookie.getValue();
-            }
-        }
-        return null;
-    }
-
-    // Helper: Extract JWT from Authorization header
-    private String extractJwtFromRequest(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
-        }
-        return null;
-    }
 }

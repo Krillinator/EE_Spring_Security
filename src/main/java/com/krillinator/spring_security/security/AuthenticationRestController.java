@@ -2,6 +2,7 @@ package com.krillinator.spring_security.security;
 
 import com.krillinator.spring_security.security.jwt.JwtUtils;
 import com.krillinator.spring_security.user.CustomUserDetails;
+import com.krillinator.spring_security.user.dto.CustomUserLoginDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,15 +35,16 @@ public class AuthenticationRestController {
     // TODO - Test against permissions
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(
-            @RequestParam String username,
-            @RequestParam String password,
+            @RequestBody CustomUserLoginDTO customUserLoginDTO,
             HttpServletResponse response
     ) {
-        logger.debug("Attempting authentication for user: {}", username);
+        logger.debug("Attempting authentication for user: {}", customUserLoginDTO.username());
 
         // Step 1: Perform authentication
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+                new UsernamePasswordAuthenticationToken(
+                        customUserLoginDTO.username(),
+                        customUserLoginDTO.password())
         );
 
         // 🧩 DEBUG: Print full Authentication result
@@ -80,11 +83,11 @@ public class AuthenticationRestController {
         cookie.setMaxAge(3600); // 1 hour
         response.addCookie(cookie);
 
-        logger.info("Authentication successful for user: {}", username);
+        logger.info("Authentication successful for user: {}", customUserLoginDTO.username());
 
         // Step 5: Return token - Optional
         return ResponseEntity.ok(Map.of(
-                "username", username,
+                "username", customUserLoginDTO.username(),
                 "authorities", customUserDetails.getAuthorities(),
                 "token", token
         ));
