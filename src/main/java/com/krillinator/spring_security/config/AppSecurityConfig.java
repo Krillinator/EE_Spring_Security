@@ -41,7 +41,7 @@ public class AppSecurityConfig {
         // TODO Memory Storage Attack - https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/erasure.html
 
         httpSecurity
-                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
+                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // TODO - JWT, best practice?
                 .authorizeHttpRequests( auth -> auth
                         // .requestMatchers() // TODO - check against specific HTTP METHOD
                         .requestMatchers("/", "/register", "/static/**", "/login").permitAll()  // Allow localhost:8080/
@@ -50,6 +50,8 @@ public class AppSecurityConfig {
                         .requestMatchers("/user").hasRole(UserRole.USER.name())
                         .anyRequest().authenticated() // MUST exist AFTER matchers, TODO - Is this true by DEFAULT?
                 )
+
+                // TODO - If you want (optional), insert configure logic here for CORS
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

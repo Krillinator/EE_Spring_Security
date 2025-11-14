@@ -17,15 +17,15 @@ public class AppCorsConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Whitelist
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://172.0.0.1:3000"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));
-        corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
-        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://172.0.0.1:3000")); // VERCEL ADDRESS / DOMAIN
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));                                    // HTTP METHODS
+        corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With")); // TODO - Session based? Unnecessary?
+        corsConfiguration.setAllowCredentials(true); // Send Cookies
 
         // Backend related endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/v1/register", corsConfiguration);
-        source.registerCorsConfiguration("/api/v1/who-am-i", corsConfiguration);
+        // source.registerCorsConfiguration("/api/v1/register", corsConfiguration);
+        // source.registerCorsConfiguration("/api/v1/who-am-i", corsConfiguration);
         source.registerCorsConfiguration("/**", corsConfiguration); // ENABLE EVERYTHING
 
         return source;

@@ -33,13 +33,15 @@ public class AuthenticationRestController {
     }
 
     // TODO - Test against permissions
+    // TODO - Typed ResponseEntity (?)
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(
-            @RequestBody CustomUserLoginDTO customUserLoginDTO,
+            @RequestBody CustomUserLoginDTO customUserLoginDTO,     // TODO - Sanitizing Input
             HttpServletResponse response
     ) {
         logger.debug("Attempting authentication for user: {}", customUserLoginDTO.username());
 
+        // TODO - Status code for failure on authentication (for now we get 403)
         // Step 1: Perform authentication
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
