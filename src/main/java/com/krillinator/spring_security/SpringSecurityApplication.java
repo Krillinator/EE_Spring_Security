@@ -4,11 +4,13 @@ import com.krillinator.spring_security.user.CustomUser;
 import com.krillinator.spring_security.user.CustomUserDetails;
 import com.krillinator.spring_security.user.authority.UserRole;
 import com.krillinator.spring_security.security.jwt.JwtUtils;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Set;
 
+@EnableRabbit
 @SpringBootApplication
 public class SpringSecurityApplication {
 
