@@ -7,59 +7,64 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class AppSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Autowired
-    public AppSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public AppSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                             CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager(); // Handles: Password Encoder, UserDetailsService, Authentication
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
-        /* TODO - If we try to move to a resource that isn't available, we have to login to get a 404
-        *   This is unclear and can be made better
-        *   Why login to see a 404? Is this secure?
-        * */
-
-        // TODO Memory Storage Attack - https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/erasure.html
-
         httpSecurity
-                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // TODO - JWT, best practice?
-                .authorizeHttpRequests( auth -> auth
-                        // .requestMatchers() // TODO - check against specific HTTP METHOD
-                        .requestMatchers("/", "/register", "/static/**", "/login").permitAll()  // Allow localhost:8080/
-                        .requestMatchers("/debug/**").permitAll()                     // RestController for Debugging
-                        .requestMatchers("/admin", "/tools").hasRole("ADMIN")
-                        .requestMatchers("/user").hasRole(UserRole.USER.name())
-                        .anyRequest().authenticated() // MUST exist AFTER matchers, TODO - Is this true by DEFAULT?
-                )
-
-                // TODO - If you want (optional), insert configure logic here for CORS
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
+                        .requestMatchers("/", "/static/**", "/login", "/register").permitAll()
+                        .requestMatchers("/debug/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/register").permitAll()
+                        .requestMatchers("/api/login").permitAll()
 
+                        // Admin endpoints
+                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user", "/user/**").hasRole("USER")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Authenticated endpoints
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/todo/**").authenticated()
+
+                        // Any other request
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
-
 }

@@ -45,14 +45,11 @@ public class AuthenticationRestController {
         logger.debug("Attempting authentication for user: {}", customUserLoginDTO.username());
 
         // TODO - Status code for failure on authentication (for now we get 403)
-        // Step 1: Perform authentication
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         customUserLoginDTO.username(),
                         customUserLoginDTO.password())
         );
-
-        // 🧩 DEBUG: Print full Authentication result
         System.out.println("\n========= AUTHENTICATION RESULT =========");
         System.out.println("Class: " + authentication.getClass().getSimpleName());
         System.out.println("Authenticated: " + authentication.isAuthenticated());
@@ -74,17 +71,14 @@ public class AuthenticationRestController {
         System.out.println("Authorities: " + authentication.getAuthorities());
         System.out.println("=========================================\n");
 
-        // Step 2: Extract your custom principal
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        // Step 3: Generate JWT using your domain model (now includes roles)
         String token = jwtUtils.generateJwtToken(customUserDetails.getCustomUser());
 
-        // Step 4: Set cookie
         Cookie cookie = new Cookie("authToken", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // ✅ change to true in production (HTTPS only)
-        cookie.setAttribute("SameSite", "Lax"); // CSRF protection
+        cookie.setSecure(false); //
+        cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/");
         cookie.setMaxAge(3600); // 1 hour
         response.addCookie(cookie);
@@ -98,7 +92,7 @@ public class AuthenticationRestController {
                 "User Logged in, todo: send email to user to alert them of login from weird IP addresses"
         );
 
-        // Step 5: Return token - Optional
+
         return ResponseEntity.ok(Map.of(
                 "username", customUserLoginDTO.username(),
                 "authorities", customUserDetails.getAuthorities(),

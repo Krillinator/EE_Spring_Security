@@ -13,22 +13,45 @@ public class AppCorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        // Whitelist
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://172.0.0.1:3000")); // VERCEL ADDRESS / DOMAIN
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));                                    // HTTP METHODS
-        corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With")); // TODO - Session based? Unnecessary?
-        corsConfiguration.setAllowCredentials(true); // Send Cookies
+        // Whitelist - allow all origins for development
+        corsConfiguration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://localhost:8080",
+                "http://172.0.0.1:3000"
+        ));
 
-        // Backend related endpoints
+        // Allow all HTTP methods
+        corsConfiguration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
+        ));
+
+        // Allow all headers
+        corsConfiguration.setAllowedHeaders(List.of(
+                "Content-Type",
+                "Authorization",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers",
+                "Cache-Control"
+        ));
+
+        // Expose headers
+        corsConfiguration.setExposedHeaders(List.of(
+                "Authorization",
+                "Content-Type"
+        ));
+
+        corsConfiguration.setAllowCredentials(true); // Send Cookies
+        corsConfiguration.setMaxAge(3600L); // Cache preflight response for 1 hour
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // source.registerCorsConfiguration("/api/v1/register", corsConfiguration);
-        // source.registerCorsConfiguration("/api/v1/who-am-i", corsConfiguration);
-        source.registerCorsConfiguration("/**", corsConfiguration); // ENABLE EVERYTHING
+        source.registerCorsConfiguration("/**", corsConfiguration);
 
         return source;
     }
-
 }
